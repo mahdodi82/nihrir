@@ -2,80 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منصة نِحرير - الواجهة الرئيسية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Noto+Kufi+Arabic:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>منصة نِحرير - الرئيسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Noto+Kufi+Arabic:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --dark: #0c2340; --gold: #c5a059; --bg: #f8f9fa; }
-        body { font-family: 'Noto Kufi Arabic', sans-serif; margin: 0; background: var(--bg); color: var(--dark); }
-        
-        /* القائمة العلوية */
+        body { font-family: 'Noto Kufi Arabic', sans-serif; margin: 0; background: var(--bg); }
         .navbar { background: var(--dark); padding: 15px 8%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .logo { font-family: 'Amiri', serif; font-size: 2.2rem; color: var(--gold); text-decoration: none; }
-        .nav-links a { color: white; text-decoration: none; margin-right: 25px; font-weight: 500; transition: 0.3s; }
-        .nav-links a:hover { color: var(--gold); }
-
-        /* قسم الترحيب الضخم */
-        .hero { height: 70vh; background: linear-gradient(rgba(12,35,64,0.85), rgba(12,35,64,0.85)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1350&q=80'); background-size: cover; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 0 10%; }
-        .hero h1 { font-family: 'Amiri', serif; font-size: 3.5rem; margin-bottom: 20px; color: var(--gold); }
-        .hero p { font-size: 1.3rem; max-width: 900px; line-height: 1.8; }
-
-        /* الأقسام العلمية (روابط خارجية) */
-        .sections-container { padding: 60px 10%; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .section-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border-bottom: 5px solid var(--gold); transition: 0.4s; }
-        .section-card:hover { transform: translateY(-10px); }
-        .section-card i { font-size: 3.5rem; color: var(--gold); margin-bottom: 20px; }
-        .btn-link { display: inline-block; margin-top: 20px; padding: 10px 25px; background: var(--dark); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-
-        footer { background: var(--dark); color: white; padding: 40px 10%; text-align: center; }
+        .user-nav-box { display: flex; align-items: center; gap: 15px; color: white; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); cursor: pointer; object-fit: cover; }
+        .admin-btn { background: #e74c3c; color: white; padding: 5px 12px; border-radius: 5px; text-decoration: none; font-size: 0.8rem; font-weight: bold; margin-left: 10px; }
+        .hero { height: 60vh; background: linear-gradient(rgba(12,35,64,0.8), rgba(12,35,64,0.8)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80'); background-size: cover; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
+        .btn-gold { background: var(--gold); color: var(--dark); padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
-
 <nav class="navbar">
     <a href="index.html" class="logo">نِحرير</a>
-    <div class="nav-links">
-        <a href="index.html">الرئيسية</a>
-        <a href="login.html">تسجيل الدخول</a>
-        <a href="dashboard.html">المكتبة العلمية</a>
-        <a href="admin.html" style="color: var(--gold);"><i class="fas fa-lock"></i> الإدارة</a>
+    <div id="authContent" class="user-nav-box">
+        <a href="login.html" id="loginLink" style="color: white; text-decoration: none;">تسجيل الدخول</a>
     </div>
 </nav>
-
 <section class="hero">
-    <h1>منصة نِحرير للبحث العلمي والتأهيل الحركي</h1>
-    <p>منصة متخصصة تجمع بين الخبرة الميدانية في التأهيل الحركي وهندسة الميكانيكا الحيوية. نهدف لتطوير الكفاءات العلمية الجزائرية من خلال أبحاثنا حول التوازن الديناميكي (SEBT) والأسطح غير المستقرة (Bosu Ball).</p>
+    <h1 id="welcomeTitle">مرحباً بك في منصة نِحرير العلمية</h1>
+    <p>أول منصة جزائرية متخصصة في التأهيل الحركي والميكانيكا الحيوية والعلوم الطبية</p>
+    <a href="dashboard.html" id="enterLib" class="btn-gold" style="display:none;">دخول المكتبة العلمية</a>
 </section>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAOiRs8QWVxo0FMmFJrv_KTNDNvxrp8TzE",
+        authDomain: "nihrir-7527c.firebaseapp.com",
+        projectId: "nihrir-7527c",
+        storageBucket: "nihrir-7527c.firebasestorage.app",
+        messagingSenderId: "912985166127",
+        appId: "1:912985166127:web:b841722bdcad5d4ef6d1da"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-<div class="sections-container">
-    <!-- الرابط الأول: التأهيل الحركي -->
-    <div class="section-card">
-        <i class="fas fa-walking"></i>
-        <h3>التأهيل الحركي والوظيفي</h3>
-        <p>دروس تطبيقية حول إعادة التأهيل بعد الإصابات الرياضية وتصميم البرامج الحركية المتخصصة.</p>
-        <a href="dashboard.html?cat=rehab" class="btn-link">دخول القسم</a>
-    </div>
-
-    <!-- الرابط الثاني: الميكانيكا الحيوية -->
-    <div class="section-card">
-        <i class="fas fa-microchip"></i>
-        <h3>الميكانيكا الحيوية (Biomechanics)</h3>
-        <p>استخدام Microcontrollers وحساسات HC-SR04 في تحليل الحركة وقياس زوايا المفاصل بدقة.</p>
-        <a href="dashboard.html?cat=biomech" class="btn-link">دخول القسم</a>
-    </div>
-
-    <!-- الرابط الثالث: نبلاء الجزائر -->
-    <div class="section-card">
-        <i class="fas fa-history"></i>
-        <h3>برنامج "نبلاء الجزائر"</h3>
-        <p>سلسلة معرفية تسلط الضوء على الشخصيات العلمية والتاريخية الجزائرية برؤية عصرية.</p>
-        <a href="dashboard.html?cat=nobles" class="btn-link">دخول القسم</a>
-    </div>
-</div>
-
-<footer>
-    <p>© 2026 منصة نِحرير - إعداد أخصائي التأهيل الحركي مهدي مستفاوي</p>
-</footer>
-
+    auth.onAuthStateChanged(async (user) => {
+        const authContent = document.getElementById('authContent');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const enterLib = document.getElementById('enterLib');
+        if (user) {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                const isAdmin = user.email === "admin@nihrir.com"; 
+                welcomeTitle.innerText = `مرحباً د. ${userData.name}`;
+                enterLib.style.display = 'block';
+                authContent.innerHTML = `
+                    ${isAdmin ? '<a href="admin.html" class="admin-btn">لوحة الإدارة</a>' : ''}
+                    <span>د. ${userData.name}</span>
+                    <img src="${userData.photoURL || 'https://via.placeholder.com/40'}" class="user-avatar" onclick="window.location.href='profile.html'">
+                `;
+            }
+        }
+    });
+</script>
 </body>
 </html>
