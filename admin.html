@@ -2,81 +2,65 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة إدارة نِحرير - NIHRIR Admin</title>
-    <!-- Firebase SDKs -->
+    <title>لوحة الإدارة - نِحرير</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         :root { --admin-bg: #1a1c23; --card-bg: #24262d; --gold: #c5a059; --text: #f4f5f7; }
         body { font-family: 'Noto Kufi Arabic', sans-serif; background: var(--admin-bg); color: var(--text); margin: 0; padding: 20px; }
-        
         .admin-container { max-width: 1200px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--card-bg); padding-bottom: 20px; margin-bottom: 30px; }
-        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .card h3 { color: var(--gold); border-right: 4px solid var(--gold); padding-right: 15px; margin-bottom: 20px; }
-
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #2d2f36; border: 1px solid #3f414a; color: white; border-radius: 6px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; }
+        .card h3 { color: var(--gold); border-right: 4px solid var(--gold); padding-right: 15px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #2d2f36; border: 1px solid #3f414a; color: white; border-radius: 6px; box-sizing: border-box; }
         .btn-upload { background: var(--gold); color: #1a1c23; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-        .btn-upload:hover { background: #d4af37; }
-
         .user-row { display: flex; justify-content: space-between; align-items: center; background: #2d2f36; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
         .btn-approve { background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
-
 <div class="admin-container">
     <div class="header">
-        <h1><i class="fas fa-user-shield"></i> لوحة الإدارة المركزية - نِحرير</h1>
+        <h1><i class="fas fa-user-shield"></i> لوحة الإدارة المركزية</h1>
         <a href="index.html" style="color: var(--gold); text-decoration: none;">العودة للموقع</a>
     </div>
-
     <div class="grid">
-        <!-- قسم رفع المحتوى الضخم -->
         <div class="card">
-            <h3><i class="fas fa-cloud-upload-alt"></i> رفع مادة علمية جديدة</h3>
-            <p style="font-size: 0.9rem; color: #9e9e9e;">اختر القسم بعناية ليتم توجيه المحتوى لصفحته الخاصة.</p>
-            
+            <h3><i class="fas fa-cloud-upload-alt"></i> رفع مادة علمية</h3>
             <label>عنوان المادة</label>
-            <input type="text" id="postTitle" placeholder="مثلاً: تحليل توازن SEBT باستخدام Arduino">
-            
-            <label>رابط الفيديو أو الملف</label>
+            <input type="text" id="postTitle" placeholder="مثلاً: تحليل توازن SEBT">
+            <label>رابط الملف</label>
             <input type="text" id="postLink" placeholder="رابط يوتيوب أو جوجل درايف">
-            
-            <label>تحديد القسم (الاختصاص)</label>
+            <label>تحديد القسم</label>
             <select id="postCategory">
-                <option value="rehab">التأهيل الحركي والوظيفي</option>
-                <option value="biomech">الميكانيكا الحيوية (Biomechanics)</option>
-                <option value="nobles">برنامج نبلاء الجزائر</option>
-                <option value="research">الأبحاث والدراسات الأكاديمية</option>
+                <optgroup label="المحاضرات الطبية">
+                    <option value="الطب و الجراحة">الطب و الجراحة</option>
+                    <option value="طب الأطفال">طب الأطفال</option>
+                    <option value="طب التخدير">طب التخدير</option>
+                    <option value="طب النساء و التوليد">طب النساء و التوليد</option>
+                    <option value="طب المختبرات والتحاليل">طب المختبرات والتحاليل</option>
+                    <option value="طب الأمراض الباطنية">طب الأمراض الباطنية</option>
+                    <option value="طب و جراحة العظام">طب و جراحة العظام</option>
+                    <option value="طب الأعصاب والعمود الفقري">طب الأعصاب والعمود الفقري</option>
+                </optgroup>
+                <option value="books">كتب علمية</option>
+                <option value="research">دراسات وأبحاث</option>
             </select>
-            
             <label>وصف مختصر</label>
-            <textarea id="postDesc" rows="3" placeholder="اكتب نبذة عن هذا المحتوى..."></textarea>
-            
-            <button class="btn-upload" onclick="uploadContent()">نشر المادة الآن</button>
+            <textarea id="postDesc" rows="3"></textarea>
+            <button class="btn-upload" onclick="uploadContent()">نشر الآن</button>
         </div>
-
-        <!-- قسم إدارة الطلاب -->
         <div class="card">
-            <h3><i class="fas fa-users-cog"></i> طلبات الانضمام (بانتظار الموافقة)</h3>
-            <div id="pendingUsersList">
-                <!-- الطلاب يظهرون هنا تلقائياً -->
-                <p style="color: #9e9e9e; text-align: center;">جاري تحميل الطلبات...</p>
-            </div>
+            <h3><i class="fas fa-users-cog"></i> طلبات التفعيل</h3>
+            <div id="pendingUsersList">جاري التحميل...</div>
         </div>
     </div>
 </div>
-
 <script>
-    // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAOiRs8QWVxo0FMmFJrv_KTNDNvxrp8TzE",
         authDomain: "nihrir-7527c.firebaseapp.com",
@@ -88,60 +72,31 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // وظيفة رفع المحتوى
     async function uploadContent() {
         const title = document.getElementById('postTitle').value;
         const link = document.getElementById('postLink').value;
         const cat = document.getElementById('postCategory').value;
         const desc = document.getElementById('postDesc').value;
-
-        if(!title || !link) { alert("يرجى إدخال العنوان والرابط"); return; }
-
-        try {
-            await db.collection('nihrir_data').add({
-                title: title,
-                link: link,
-                category: cat,
-                description: desc,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            alert("تم النشر بنجاح في قسم: " + cat);
-            // تفريغ الحقول بعد الرفع
-            document.getElementById('postTitle').value = '';
-            document.getElementById('postLink').value = '';
-        } catch (e) { alert("خطأ في الرفع: " + e.message); }
+        if(!title || !link) { alert("يرجى ملء البيانات"); return; }
+        await db.collection('nihrir_data').add({ title, link, category: cat, description: desc, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("تم النشر بنجاح!");
     }
 
-    // وظيفة جلب الطلاب الذين ينتظرون التفعيل
     function loadPendingUsers() {
-        db.collection('users').where('status', '==', 'pending')
-        .onSnapshot((snapshot) => {
+        db.collection('users').where('status', '==', 'pending').onSnapshot(snap => {
             let html = '';
-            snapshot.forEach(doc => {
+            snap.forEach(doc => {
                 const user = doc.data();
-                html += `
-                    <div class="user-row">
-                        <div>
-                            <strong>${user.name}</strong><br>
-                            <small>${user.email}</small>
-                        </div>
-                        <button class="btn-approve" onclick="approveUser('${doc.id}')">تفعيل الحساب</button>
-                    </div>
-                `;
+                html += `<div class="user-row"><div><strong>${user.name}</strong><br><small>${user.email}</small></div><button class="btn-approve" onclick="approveUser('${doc.id}')">تفعيل</button></div>`;
             });
-            document.getElementById('pendingUsersList').innerHTML = html || "لا توجد طلبات انضمام حالياً.";
+            document.getElementById('pendingUsersList').innerHTML = html || "لا توجد طلبات.";
         });
     }
 
-    // وظيفة الموافقة على الطالب
-    async function approveUser(userId) {
-        try {
-            await db.collection('users').doc(userId).update({ status: 'active' });
-            alert("تم تفعيل حساب الطالب بنجاح!");
-        } catch (e) { alert("خطأ: " + e.message); }
+    async function approveUser(id) {
+        await db.collection('users').doc(id).update({ status: 'active' });
+        alert("تم التفعيل!");
     }
-
-    // تشغيل جلب البيانات عند فتح الصفحة
     window.onload = loadPendingUsers;
 </script>
 </body>
