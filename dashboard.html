@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مكتبة نِحرير العلمية - لوحة الطالب</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root { --primary: #0c2340; --gold: #c5a059; --bg: #f0f2f5; }
+        body { font-family: 'Noto Kufi Arabic', sans-serif; background: var(--bg); margin: 0; }
+        
+        /* الهيدر */
+        .dash-nav { background: var(--primary); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        
+        /* القائمة الجانبية للتخصصات */
+        .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .sidebar { background: white; padding: 30px 20px; border-left: 1px solid #ddd; }
+        .sidebar h3 { font-size: 1rem; color: #888; margin-bottom: 20px; text-transform: uppercase; }
+        .cat-link { display: block; padding: 15px; margin-bottom: 10px; color: var(--primary); text-decoration: none; border-radius: 8px; transition: 0.3s; font-weight: 500; }
+        .cat-link:hover, .cat-link.active { background: var(--primary); color: white; }
+        .cat-link i { margin-left: 10px; }
+
+        /* منطقة المحتوى */
+        .main-content { padding: 40px; }
+        .content-header { margin-bottom: 30px; border-bottom: 2px solid var(--gold); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .material-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; position: relative; }
+        .material-card:hover { transform: translateY(-5px); }
+        .material-card .thumb { height: 180px; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--gold); }
+        .card-body { padding: 20px; }
+        .card-body h4 { margin: 0 0 10px 0; color: var(--primary); }
+        .card-body p { font-size: 0.85rem; color: #666; line-height: 1.6; }
+        
+        .btn-view { display: block; text-align: center; background: var(--gold); color: var(--primary); padding: 10px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 15px; }
+        
+        .loader { text-align: center; padding: 50px; font-size: 1.2rem; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<nav class="dash-nav">
+    <div style="font-family: 'Amiri', serif; font-size: 1.8rem; font-weight: bold; color: var(--gold);">نِحرير - المكتبة</div>
+    <div class="user-info">
+        <span id="userNameDisplay">مرحباً باحث..</span>
+        <button onclick="logout()" style="background:none; border:1px solid var(--gold); color:var(--gold); padding:5px 10px; cursor:pointer; border-radius:5px;">خروج</button>
+    </div>
+</nav>
+
+<div class="layout">
+    <!-- قائمة الاختصاصات -->
+    <div class="sidebar">
+        <h3>الأقسام العلمية</h3>
+        <a href="#" class="cat-link active" onclick="loadCategory('rehab', this)"><i class="fas fa-walking"></i> التأهيل الحركي</a>
+        <a href="#" class="cat-link" onclick="loadCategory('biomech', this)"><i class="fas fa-microchip"></i> الميكانيكا الحيوية</a>
+        <a href="#" class="cat-link" onclick="loadCategory('nobles', this)"><i class="fas fa-history"></i> نبلاء الجزائر</a>
+        <a href="#" class="cat-link" onclick="loadCategory('research', this)"><i class="fas fa-flask"></i> أبحاث وأدوات</a>
+    </div>
+
+    <!-- عرض البيانات -->
+    <div class="main-content">
+        <div class="content-header">
+            <h2 id="categoryTitle">قسم التأهيل الحركي</h2>
+            <small id="itemCount">جاري الحصر...</small>
+        </div>
+
+        <div id="loader" class="loader"><i class="fas fa-spinner fa-spin"></i> جاري تحميل المعرفة...</div>
+        <div id="materialsGrid" class="content-grid"></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAOiRs8QWVxo0FMmFJrv_KTNDNvxrp8TzE",
+        authDomain: "nihrir-7527c.firebaseapp.com",
+        projectId: "nihrir-7527c",
+        storageBucket: "nihrir-7527c.firebasestorage.app",
+        messagingSenderId: "912985166127",
+        appId: "1:912985166127:web:b841722bdcad5d4ef6d1da"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // التحقق من هوية المستخدم وحالته
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().status === 'active') {
+                document.getElementById('userNameDisplay').innerText = "الباحث: " + userDoc.data().name;
+                // تحميل القسم الافتراضي أو المختار من الرابط
+                const urlParams = new URLSearchParams(window.location.search);
+                const cat = urlParams.get('cat') || 'rehab';
+                loadCategory(cat);
+            } else {
+                alert("غير مسموح لك بالدخول.");
+                window.location.href = 'login.html';
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    async function loadCategory(catId, element) {
+        // تحديث واجهة الروابط
+        if(element) {
+            document.querySelectorAll('.cat-link').forEach(l => l.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        const grid = document.getElementById('materialsGrid');
+        const loader = document.getElementById('loader');
+        const title = document.getElementById('categoryTitle');
+        
+        grid.innerHTML = '';
+        loader.style.display = 'block';
+
+        // تغيير العنوان حسب القسم
+        const titles = {
+            'rehab': 'التأهيل الحركي والوظيفي',
+            'biomech': 'الميكانيكا الحيوية (Arduino & Sensors)',
+            'nobles': 'سلسلة نبلاء الجزائر',
+            'research': 'الأبحاث والأدوات الأكاديمية'
+        };
+        title.innerText = titles[catId] || "القسم العلمي";
+
+        try {
+            const snapshot = await db.collection('nihrir_data')
+                               .where('category', '==', catId)
+                               .orderBy('timestamp', 'desc')
+                               .get();
+
+            loader.style.display = 'none';
+            document.getElementById('itemCount').innerText = `${snapshot.size} مادة علمية`;
+
+            if (snapshot.empty) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">لا يوجد محتوى مرفوع في هذا القسم بعد.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const icon = catId === 'biomech' ? 'fa-microchip' : (catId === 'nobles' ? 'fa-university' : 'fa-file-medical');
+                
+                grid.innerHTML += `
+                    <div class="material-card">
+                        <div class="thumb"><i class="fas ${icon}"></i></div>
+                        <div class="card-body">
+                            <h4>${data.title}</h4>
+                            <p>${data.description || 'لا يوجد وصف متاح هذه المادة.'}</p>
+                            <a href="${data.link}" target="_blank" class="btn-view">مشاهدة / تحميل</a>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error(e);
+            loader.innerHTML = "حدث خطأ أثناء جلب البيانات.";
+        }
+    }
+
+    function logout() {
+        auth.signOut().then(() => window.location.href = 'login.html');
+    }
+</script>
+</body>
+</html>
